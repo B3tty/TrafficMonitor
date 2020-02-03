@@ -9,8 +9,6 @@ namespace TrafficMonitor
     {
         public static void ReadFile(String path)
         {
-            var time = DateTime.Now;
-            //var now = new DateTime(2018, 05, 09, 16, 0, 50);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -40,6 +38,7 @@ namespace TrafficMonitor
                             if (stopwatch.ElapsedMilliseconds > 10000)
                             {
                                 analytics.Display();
+                                analytics.Check2mnSpan();
                                 analytics.Flush();
                                 stopwatch.Restart();
                             }
