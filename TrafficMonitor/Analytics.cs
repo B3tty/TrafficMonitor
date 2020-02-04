@@ -9,9 +9,9 @@ namespace TrafficMonitor
     {
         private readonly int _nbTopSectionsDisplay;
         private readonly int _logDurationSec;
-        private List<Log> _currentLogs = new List<Log>();
-        private Dictionary<int, int> _responseCodeMap = new Dictionary<int, int>();
-        private Dictionary<String, int> _sectionMap = new Dictionary<string, int>();
+        internal List<Log> _currentLogs = new List<Log>();
+        internal Dictionary<int, int> _responseCodeMap = new Dictionary<int, int>();
+        internal Dictionary<String, int> _sectionMap = new Dictionary<string, int>();
 
         public Analytics(int nbTopSectionsDisplay, int logDurationSec)
         {
@@ -27,9 +27,14 @@ namespace TrafficMonitor
             _responseCodeMap.TryGetValue(responseCodeGroup, out var codeCount); 
             _responseCodeMap[responseCodeGroup] = codeCount + 1;
 
-            String section = log.resource.Split(' ')[1].Split('/')[1];
-            _sectionMap.TryGetValue(section, out var sectionCount); 
-            _sectionMap[section] = sectionCount + 1;
+            _sectionMap.TryGetValue(log.section, out var sectionCount); 
+            _sectionMap[log.section] = sectionCount + 1;
+        }
+
+        public void OnInterval()
+        {
+            Display();
+            Flush();
         }
 
         public void Flush()

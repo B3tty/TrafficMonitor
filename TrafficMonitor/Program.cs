@@ -8,15 +8,12 @@ namespace TrafficMonitor
 {
     class Program
     {
-        private static readonly String defaultPath = "tmp/access.log";
+        private static readonly String defaultPath = "/tmp/access.log";
         static void Main(string[] args)
         {
-
-            # region config
-            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            # region configuration
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env}.json", true)
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -26,25 +23,16 @@ namespace TrafficMonitor
                 path = defaultPath;
             }
 
-            int intervalDurationSec;
-            try
-            {
-                intervalDurationSec = int.Parse(configuration["Analytics:TimeSpanSec"]);
-            }
-            catch
-            {
-                intervalDurationSec = 10;
-            }
+            int intervalDurationSec = int.Parse(configuration["Analytics:TimeSpanSec"]);
 
-            var analytics = new Analytics(
+            Analytics analytics = new Analytics(
                 int.Parse(configuration["Analytics:TopSections"]),
                 intervalDurationSec);
 
-            var alerting = new Alerting(
+            Alerting alerting = new Alerting(
                 int.Parse(configuration["Alerting:HitsThreshold"]),
                 int.Parse(configuration["Alerting:TimeSpanSec"]));
-
-            # endregion config
+            # endregion
 
             Stopwatch logStopwatch = new Stopwatch();
             logStopwatch.Start();
@@ -71,22 +59,19 @@ namespace TrafficMonitor
                             var line = sr.ReadLine();
                             if (!String.IsNullOrEmpty(line))
                             {
-                                var log = new Log(line);
-                                // TODO Remove console output
-                                Console.WriteLine(line);
+                                Log log = new Log(line);
                                 analytics.Register(log);
                                 alerting.Register(log);
                             }
                             if (logStopwatch.ElapsedMilliseconds > intervalDurationSec * 1000)
                             {
-                                analytics.Display();
-                                analytics.Flush();
+                                analytics.OnInterval();
                                 logStopwatch.Restart();
                             }
                             // we check the alert state every second
                             if (alertStopwatch.ElapsedMilliseconds > 1000)
                             {
-                                alerting.CheckAlertStatus();
+                                alerting.OnInterval();
                                 alertStopwatch.Restart();
                             }
                         }
