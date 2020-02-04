@@ -7,91 +7,58 @@ namespace TrafficMonitor
 {
     class Analytics
     {
-        private static int nbCallAlertThreshold = 10;
-        private static int nbTopSectionsDisplay = 5;
-        private List<Log> currentLogs = new List<Log>();
-        private Dictionary<int, int> responseCodeMap = new Dictionary<int, int>();
-        private Dictionary<String, int> sectionMap = new Dictionary<string, int>();
-        private Stack<int> last2mnCallsCount = new Stack<int>();
-        private bool inAlert = false;
-        private DateTime alertStart;
+        private readonly int _nbTopSectionsDisplay;
+        private readonly int _logDurationSec;
+        private List<Log> _currentLogs = new List<Log>();
+        private Dictionary<int, int> _responseCodeMap = new Dictionary<int, int>();
+        private Dictionary<String, int> _sectionMap = new Dictionary<string, int>();
 
-        public void Account(Log log)
+        public Analytics(int nbTopSectionsDisplay, int logDurationSec)
         {
-            currentLogs.Add(log);
-            
-            int responseCodeGroup = log.responseCode / 100;
-            responseCodeMap.TryGetValue(responseCodeGroup, out var codeCount); 
-            responseCodeMap[responseCodeGroup] = codeCount + 1;
-
-            String section = log.resource.Split(' ')[1].Split('/')[1];
-            sectionMap.TryGetValue(section, out var sectionCount); 
-            sectionMap[section] = sectionCount + 1;
+            _nbTopSectionsDisplay = nbTopSectionsDisplay;
+            _logDurationSec = logDurationSec;
         }
 
-        public void Check2mnSpan()
+        public void Register(Log log)
         {
-            if (last2mnCallsCount.Count < 12)
-            {
-                last2mnCallsCount.Push(currentLogs.Count);
-                return;
-            } 
-            last2mnCallsCount.Pop();
-            last2mnCallsCount.Push(currentLogs.Count);
-            var avgNbCallsPerSec = last2mnCallsCount.Sum() / last2mnCallsCount.Count;
-            if (avgNbCallsPerSec > nbCallAlertThreshold && !inAlert)
-            {
-                inAlert = true;
-                alertStart = DateTime.Now;
-                DisplayAlertStart(avgNbCallsPerSec, alertStart);
-                // “High traffic generated an alert - hits = {value}, triggered at {time}”
-            }
-            if (avgNbCallsPerSec < nbCallAlertThreshold && inAlert)
-            {
-                inAlert = false;
-                DisplayAlertEnd(alertStart);
-            }
+            _currentLogs.Add(log);
+            
+            int responseCodeGroup = log.responseCode / 100;
+            _responseCodeMap.TryGetValue(responseCodeGroup, out var codeCount); 
+            _responseCodeMap[responseCodeGroup] = codeCount + 1;
+
+            String section = log.resource.Split(' ')[1].Split('/')[1];
+            _sectionMap.TryGetValue(section, out var sectionCount); 
+            _sectionMap[section] = sectionCount + 1;
         }
 
         public void Flush()
         {
-            currentLogs = new List<Log>();
-            responseCodeMap = new Dictionary<int, int>();
-            sectionMap = new Dictionary<string, int>();
-        }
-
-        public void DisplayAlertStart(int avgNbHits, DateTime alertStartTime)
-        {
-            Console.WriteLine(new String('*', 50));
-            Console.WriteLine($"High traffic generated an alert - hits per sec = {avgNbHits}, triggered at {alertStartTime}");
-            Console.WriteLine(new String('*', 50));
-        }
-
-        public void DisplayAlertEnd(DateTime alertStartTime)
-        {
-            Console.WriteLine(new String('*', 50));
-            Console.WriteLine($"Alert started at {alertStartTime} is now over ({DateTime.Now}).");
-            Console.WriteLine(new String('*', 50));
+            _currentLogs = new List<Log>();
+            _responseCodeMap = new Dictionary<int, int>();
+            _sectionMap = new Dictionary<string, int>();
         }
 
         public void Display()
         {
             Console.WriteLine(new String('-', 50));
 
-            Console.WriteLine($"Total number of calls in the last 10s: {currentLogs.Count}");
+            Console.WriteLine($"Total number of calls in the last {_logDurationSec}s: {_currentLogs.Count}");
             Console.WriteLine();
 
             Console.WriteLine($"Top Sections Called: ");
-            var topSections = sectionMap.ToList();
-            topSections.Sort((kvp1, kvp2) => kvp1.Value.CompareTo(kvp2.Value));
-            foreach(KeyValuePair<String, int> kvp in topSections.Take(nbTopSectionsDisplay))
+            var sections = _sectionMap.ToList();
+            sections.Sort((kvp1, kvp2) => -kvp1.Value.CompareTo(kvp2.Value));
+            foreach(KeyValuePair<String, int> kvp in sections.Take(_nbTopSectionsDisplay))
             {
                 Console.WriteLine($"  {kvp.Key}: {kvp.Value} hits");
             }
             Console.WriteLine();
 
             Console.WriteLine($"Response Codes:");
-            foreach(KeyValuePair<int, int> kvp in responseCodeMap)
+            var responseCodes = _responseCodeMap.ToList();
+            responseCodes.Sort((kvp1, kvp2) => kvp1.Key.CompareTo(kvp2.Key));
+            foreach(KeyValuePair<int, int> kvp in responseCodes)
             {
                 Console.WriteLine($"  {kvp.Key}xx: {kvp.Value}");
             }
