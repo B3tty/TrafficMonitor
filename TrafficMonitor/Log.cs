@@ -50,6 +50,7 @@ namespace TrafficMonitor
             Log log = obj as Log;
             return (log != null)
                 && ip == log.ip
+                && ident == log.ident
                 && user == log.user
                 && timestamp == log.timestamp
                 && request == log.request

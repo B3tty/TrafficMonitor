@@ -12,6 +12,23 @@ namespace TrafficMonitor.Tests
         [Fact]
         public void Ctor_CorrectBuildFromText()
         {
+            Log logParsed = new Log("127.0.0.1 user-identifier betty [09/May/2018:16:00:42 +0000] \"POST /api/user HTTP/1.0\" 503 12");
+            Log logExpected = new Log{
+                ip="127.0.0.1",
+                ident="user-identifier",
+                user="betty",
+                timestamp=new DateTime(2018, 05, 09, 16, 0, 42, DateTimeKind.Utc),
+                request="POST /api/user HTTP/1.0",
+                section="api",
+                responseCode=503,
+                responseSize=12
+            };
+            Assert.Equal(logExpected, logParsed);
+        }
+
+        [Fact]
+        public void Ctor_IdentUnknown()
+        {
             Log logParsed = new Log("127.0.0.1 - betty [09/May/2018:16:00:42 +0000] \"POST /api/user HTTP/1.0\" 503 12");
             Log logExpected = new Log{
                 ip="127.0.0.1",
@@ -23,7 +40,41 @@ namespace TrafficMonitor.Tests
                 responseCode=503,
                 responseSize=12
             };
-            Assert.Equal(logExpected.timestamp, logParsed.timestamp);
+            Assert.Equal(logExpected, logParsed);
+        }
+
+        [Fact]
+        public void Ctor_UserUnknown()
+        {
+            Log logParsed = new Log("127.0.0.1 user-identifier - [09/May/2018:16:00:42 +0000] \"POST /api/user HTTP/1.0\" 503 12");
+            Log logExpected = new Log{
+                ip="127.0.0.1",
+                ident="user-identifier",
+                user="-",
+                timestamp=new DateTime(2018, 05, 09, 16, 0, 42, DateTimeKind.Utc),
+                request="POST /api/user HTTP/1.0",
+                section="api",
+                responseCode=503,
+                responseSize=12
+            };
+            Assert.Equal(logExpected, logParsed);
+        }
+
+        [Fact]
+        public void Ctor_UserAndIdentUnknown()
+        {
+            Log logParsed = new Log("127.0.0.1 - - [09/May/2018:16:00:42 +0000] \"POST /api/user HTTP/1.0\" 503 12");
+            Log logExpected = new Log{
+                ip="127.0.0.1",
+                ident="-",
+                user="-",
+                timestamp=new DateTime(2018, 05, 09, 16, 0, 42, DateTimeKind.Utc),
+                request="POST /api/user HTTP/1.0",
+                section="api",
+                responseCode=503,
+                responseSize=12
+            };
+            Assert.Equal(logExpected, logParsed);
         }
 
         [Fact]
