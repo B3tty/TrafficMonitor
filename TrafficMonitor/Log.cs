@@ -29,11 +29,15 @@ namespace TrafficMonitor
                 ip = match.Groups[1].Value;
                 ident = match.Groups[2].Value;
                 user = match.Groups[3].Value;
-                timestamp = DateTime.ParseExact(
+                try {
+                    timestamp = DateTime.ParseExact(
                     match.Groups[4].Value,
                     "dd/MMM/yyyy:H:mm:ss zzz",
                     System.Globalization.CultureInfo.InvariantCulture,
                     System.Globalization.DateTimeStyles.AdjustToUniversal);
+                } catch {
+                    timestamp = DateTime.Now;
+                }
                 request = match.Groups[5].Value;
                 responseCode = int.Parse(match.Groups[6].Value);
                 responseSize = int.Parse(match.Groups[7].Value);

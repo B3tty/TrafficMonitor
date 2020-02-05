@@ -107,5 +107,12 @@ namespace TrafficMonitor.Tests
             Log logExpected = new Log{section=""};
             Assert.Equal(logExpected.section, logParsed.section);
         }
+
+        [Fact]
+        public void Ctor_DifferentDateFormat()
+        {
+            // We're just checking that it does not crash
+            Log logParsed = new Log("127.0.0.1 user-identifier betty [09/05/2018:16:00:42 +0000] \"POST /api/user HTTP/1.0\" 503 12");
+        }
     }
 }

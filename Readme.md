@@ -4,14 +4,13 @@
 
  This application is a simple console program that monitors HTTP traffic on a server.
 
-Consume an actively written-to w3c-formatted HTTP access log (https://www.w3.org/Daemon/User/Config/Logging.html). It should default to reading /tmp/access.log and be overrideable
+Consume an actively written-to HTTP access log. It defaults to reading /tmp/access.log and is overrideable
 Example log lines:
 
 ```
-127.0.0.1 - james [09/May/2018:16:00:39 +0000] "GET /report HTTP/1.0" 200 123
-127.0.0.1 - jill [09/May/2018:16:00:41 +0000] "GET /api/user HTTP/1.0" 200 234
-127.0.0.1 - frank [09/May/2018:16:00:42 +0000] "POST /api/user HTTP/1.0" 200 34
-127.0.0.1 - mary [09/May/2018:16:00:42 +0000] "POST /api/user HTTP/1.0" 503 12
+127.1.1.1 - jack [23/May/2018:16:00:39 +0000] "GET /experiment HTTP/1.0" 200 134
+127.1.1.1 user-identifier lucy [23/May/2018:16:00:41 +0000] "GET /api/variation HTTP/1.0" 200 245
+127.1.1.1 - betty [23/May/2018:16:00:42 +0000] "POST /api/variation HTTP/1.0" 503 21
 ```
 
 Functionalities:
@@ -23,11 +22,20 @@ Functionalities:
 * Whenever total traffic for the past 2 minutes exceeds a certain number on average, display a message saying that “High traffic generated an alert - hits = {value}, triggered at {time}”.
   The default threshold should be 10 requests per second, and is overridable
 * Whenever the total traffic drops again below that value on average for the past 2 minutes, display another message detailing when the alert recovered
-* Write a test for the alerting logic
-* Explain how you’d improve on this application design
+
+## Execution
 
 
-## Improvements / Weaknesses
 
-The hits are in the 10s time span matching the time they were handled. If we have too many hits for the program to handle everything in that timespan, or if we want to do it asynchronously, then the hits are going to be incorrectly managed in the statistics.
-A good way of doing that would be to use the timestamp that's logged.
+## Weaknesses
+
+Currently the logs are treated as they come, and we use the moment they are written as an indication to know if they were written in the last 10s. We could use the timestamp of the log to do that.
+* that would allow to display analytics for an old log file and see where alerts were raised and the traffics peaks long after it happened
+* it can be problematic to do it that way if the logs are not written synchronously. For example if they are written by batch every 4s, this way of monitoring them will be incorrect.
+
+When parsing the log lines, we assumed the date would be written in the default strftime format. If that's not the case, the date will not be parsed correctly. Since we don't use the date at the moment, it's not important, but it could be later if we decide to do something with it.
+
+
+## Improvements
+
+
