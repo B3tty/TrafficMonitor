@@ -26,6 +26,12 @@ Functionalities:
 
 ## Execution
 
+### Pre Requisites
+
+Download and install the .NET Core SDK from [.NET Downloads](https://dotnet.microsoft.com/download).
+
+### Running the Console application
+
 To run the project, execute the command `dotnet run --project TrafficMonitor/TrafficMonitor.csproj` from the solution directory.
 
 In [the settings file](TrafficMonitor/appsettings.json) you can set:
