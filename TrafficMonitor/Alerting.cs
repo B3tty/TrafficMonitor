@@ -12,11 +12,13 @@ namespace TrafficMonitor
         internal Queue<int> _lastIntervalCallsCount = new Queue<int>();
         private bool _inAlert = false;
         private DateTime _alertStart;
+        private ConsoleColor _defaultConsoleColor;
 
         public Alerting(int nbCallAlertThreshold, int durationAlertTimespanSec)
         {
             _nbCallAlertThreshold = nbCallAlertThreshold;
             _durationAlertTimespanSec = durationAlertTimespanSec;
+            _defaultConsoleColor = Console.ForegroundColor;
         }
 
         public void Register(Log log)
@@ -55,7 +57,6 @@ namespace TrafficMonitor
                     _inAlert = true;
                     _alertStart = DateTime.Now;
                     DisplayAlertStart(avgNbCallsPerSec, _alertStart);
-                    // “High traffic generated an alert - hits = {value}, triggered at {time}”
                 }
                 if (avgNbCallsPerSec < _nbCallAlertThreshold && _inAlert)
                 {
@@ -67,16 +68,20 @@ namespace TrafficMonitor
 
         private void DisplayAlertStart(int avgNbHits, DateTime alertStartTime)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(new String('*', 50));
             Console.WriteLine($"High traffic generated an alert - hits per sec = {avgNbHits}, triggered at {alertStartTime}");
             Console.WriteLine(new String('*', 50));
+            Console.ForegroundColor = _defaultConsoleColor;
         }
 
         private void DisplayAlertEnd(DateTime alertStartTime)
         {
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(new String('*', 50));
             Console.WriteLine($"Alert started at {alertStartTime} is now over ({DateTime.Now}).");
             Console.WriteLine(new String('*', 50));
+            Console.ForegroundColor = _defaultConsoleColor;
         }
     }
 }

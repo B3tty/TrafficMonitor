@@ -4,7 +4,8 @@
 
  This application is a simple console program that monitors HTTP traffic on a server.
 
-Consume an actively written-to HTTP access log. It defaults to reading /tmp/access.log and is overrideable
+Consume an actively written-to HTTP access log. It defaults to reading `/tmp/access.log` and is overrideable.
+
 Example log lines:
 
 ```
@@ -25,17 +26,36 @@ Functionalities:
 
 ## Execution
 
+To run the project, execute the command `dotnet run --project TrafficMonitor/TrafficMonitor.csproj`.
+
+In [the settings file](TrafficMonitor/appsettings.json) you can set:
+* the timespan for which you want to receive monitoring info (currently 10s)
+* the top number sections displayed
+* the timespan to watch for alerting (currently 2mn)
+* the threshold of hits per second that will trigger the alert (currently triggered at hits > 10/s)
 
 
 ## Weaknesses
 
+### Time of the log lines
+
 Currently the logs are treated as they come, and we use the moment they are written as an indication to know if they were written in the last 10s. We could use the timestamp of the log to do that.
-* that would allow to display analytics for an old log file and see where alerts were raised and the traffics peaks long after it happened
+* that would allow to display analytics for an old log file and see when alerts were raised and the traffic peaks long after it happened
 * it can be problematic to do it that way if the logs are not written synchronously. For example if they are written by batch every 4s, this way of monitoring them will be incorrect.
+
+### DateTime Format
 
 When parsing the log lines, we assumed the date would be written in the default strftime format. If that's not the case, the date will not be parsed correctly. Since we don't use the date at the moment, it's not important, but it could be later if we decide to do something with it.
 
 
 ## Improvements
+
+### Statistics
+
+Currently the stats displayed about the logs are quite poor. With more precise specifications, we could display more interesting statistics about them. Need to check with product users what they need in order to enrich them. We register all that should be needed to do so, so it should be a simple modification of the `Analytics.Display` method.
+
+### Display
+
+Obviously for a frequent use, statistics would much easier to use if the display was improved. Some graphs for some interesting metrics could be useful. As well, red color for alerting could be really useful for the user to spot them quicker.
 
 
