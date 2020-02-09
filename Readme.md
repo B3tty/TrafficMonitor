@@ -26,7 +26,7 @@ Functionalities:
 
 ## Execution
 
-To run the project, execute the command `dotnet run --project TrafficMonitor/TrafficMonitor.csproj`.
+To run the project, execute the command `dotnet run --project TrafficMonitor/TrafficMonitor.csproj` from the solution directory.
 
 In [the settings file](TrafficMonitor/appsettings.json) you can set:
 * the timespan for which you want to receive monitoring info (currently 10s)
@@ -34,6 +34,17 @@ In [the settings file](TrafficMonitor/appsettings.json) you can set:
 * the timespan to watch for alerting (currently 2mn)
 * the threshold of hits per second that will trigger the alert (currently triggered at hits > 10/s)
 
+### Running the tests
+
+To run the tests, execute the command `dotnet test TrafficMonitor.Tests/TrafficMonitor.Tests.csproj` from the solution directory.
+
+## Navigating the code
+
+* The source code for the application is in the project `TrafficMonitor`, and the tests are in the project `TrafficMonitor.Tests`.
+* `Program.cs` is where the `Main` method is: it opens the file, registers new log lines, and every relevant interval, calls the alerting and statistics mechanism.
+* `Log.cs` is the expected `Log` structure, with the parsing mechanism.
+* `Statistics.cs` is the class in charge of registering the relevant information and displaying the statistics at the end of the given interval.
+* `Alerting.cs` registers the number of log lines (or hits) received every second, and recomputes the average of hits/s over the last 120s every second. It displays alert messages when that average becomes strictly higher than the set-up threshold, and when it becomes lower again.
 
 ## Weaknesses
 
@@ -56,6 +67,9 @@ Currently the stats displayed about the logs are quite poor. With more precise s
 
 ### Display
 
-Obviously for a frequent use, statistics would much easier to use if the display was improved. Some graphs for some interesting metrics could be useful. As well, red color for alerting could be really useful for the user to spot them quicker.
+Obviously for a frequent use, statistics would much easier to use if the display was improved. Some graphs for some interesting metrics could be useful.
 
+### Scale
+
+The scale is linked to the [time of the log lines](#time-of-the-log-lines) issue. If we start getting more log lines than we can handle in the 10s interval, we'll get incorrect metrics. If that starts to happen, either we handle asynchronously by managing them by the date written in them, or we'll need to multithread, and for the multi-threaded solution we need a strategy to regroup and merge the parsed lines and their corresponding stats.
 
