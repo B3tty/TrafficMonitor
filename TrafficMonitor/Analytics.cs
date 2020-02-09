@@ -54,7 +54,7 @@ namespace TrafficMonitor
             Console.WriteLine($"Total number of calls in the last {_logDurationSec}s: {_currentLogs.Count}");
             Console.WriteLine();
 
-            Console.WriteLine($"Top Sections Called: ");
+            Console.WriteLine($"Top {_nbTopSectionsDisplay} Sections Called: ");
             var sections = _sectionMap.ToList();
             sections.Sort((kvp1, kvp2) => -kvp1.Value.CompareTo(kvp2.Value));
             foreach(KeyValuePair<String, int> kvp in sections.Take(_nbTopSectionsDisplay))
