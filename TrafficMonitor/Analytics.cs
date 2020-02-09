@@ -12,6 +12,7 @@ namespace TrafficMonitor
         internal List<Log> _currentLogs = new List<Log>();
         internal Dictionary<int, int> _responseCodeMap = new Dictionary<int, int>();
         internal Dictionary<String, int> _sectionMap = new Dictionary<string, int>();
+        internal int _sentBytes = 0;
 
         public Analytics(int nbTopSectionsDisplay, int logDurationSec)
         {
@@ -29,6 +30,7 @@ namespace TrafficMonitor
 
             _sectionMap.TryGetValue(log.section, out var sectionCount); 
             _sectionMap[log.section] = sectionCount + 1;
+            _sentBytes += log.responseSize;
         }
 
         public void OnInterval()
@@ -42,6 +44,7 @@ namespace TrafficMonitor
             _currentLogs = new List<Log>();
             _responseCodeMap = new Dictionary<int, int>();
             _sectionMap = new Dictionary<string, int>();
+            _sentBytes = 0;
         }
 
         public void Display()
@@ -67,6 +70,8 @@ namespace TrafficMonitor
             {
                 Console.WriteLine($"  {kvp.Key}xx: {kvp.Value}");
             }
+
+            Console.WriteLine($"Debit - Sent bytes in the last {_logDurationSec}s: {_sentBytes}");
 
             Console.WriteLine(new String('-', 50));
         }
