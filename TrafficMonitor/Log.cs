@@ -62,5 +62,7 @@ namespace TrafficMonitor
                 && responseCode == log.responseCode
                 && responseSize == log.responseSize;
         }
+
+        public override int GetHashCode() => (this.ip + this.timestamp + this.request).GetHashCode();
     }
 }

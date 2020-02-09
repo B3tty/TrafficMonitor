@@ -8,7 +8,7 @@ namespace TrafficMonitor
 {
     class Program
     {
-        private static readonly String defaultPath = "/tmp/access.log";
+        private static readonly String _defaultPath = "/tmp/access.log";
         static void Main(string[] args)
         {
             # region configuration
@@ -18,9 +18,10 @@ namespace TrafficMonitor
                 .Build();
 
             var path = configuration["Log:Path"];
-            if (String.IsNullOrEmpty(path))
+            if (String.IsNullOrEmpty(path) || !File.Exists(path))
             {
-                path = defaultPath;
+                Console.WriteLine($"File is not set or incorrectly set, defaulting to {_defaultPath}");
+                path = _defaultPath;
             }
 
             int intervalDurationSec = int.Parse(configuration["Analytics:TimeSpanSec"]);
@@ -46,6 +47,7 @@ namespace TrafficMonitor
                 {
                     using (var sr = new StreamReader(fs))
                     {
+                        Console.WriteLine($"Now monitoring file {path}");
                         // Get to the end of the file
                         // Doing RT monitoring, we don't want to start at the beginning of a
                         //   potentially huge log file.
