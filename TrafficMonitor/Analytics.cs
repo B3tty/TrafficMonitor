@@ -73,6 +73,7 @@ namespace TrafficMonitor
 
             Console.WriteLine($"Debit - Sent bytes in the last {_logDurationSec}s: {_sentBytes}");
 
+            Console.WriteLine();
             Console.WriteLine(new String('-', 50));
         }
     }
